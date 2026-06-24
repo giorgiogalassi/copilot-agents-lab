@@ -111,21 +111,53 @@ Rephrase the task and try to bypass the restriction. If the agent still cannot p
 
 ## Self-Assessment Questions (Exam Style)
 
-1. An agent fails a multi-step task involving a REST API. The logs show that the required tool was never invoked. What is the most likely cause? 
+> Format: each item shows your own answer (unchanged) followed by a fuller model answer for study.
 
-    _*A:* Not invoked suggest that there was no error at all, at the same time the question writes that the multi-step task failed. This can be caused by a missing tool in the allow-tools for the specific MPC/SKILL/AGENT or copilit has been started with a specific flag that deny that particular tool._ 
+### 1. An agent fails a multi-step task involving a REST API. The logs show that the required tool was never invoked. What is the most likely cause?
 
-2. What is the difference between a remote MCP server (such as GitHub MCP) and an MCP allow list? What does each one control?
+**Your answer:**
 
-    _A: A Remote MPC Server (such as GitHub MPC) controls and gives to the Agent the list of the APIs that the said Agent can invoke (ie. list of issues from GitHub or branches from a project). The MCP allow list controls which are the APIs that the Agent is allowed to call — which can be a subset of the all available ones._
+_*A:* Not invoked suggest that there was no error at all, at the same time the question writes that the multi-step task failed. This can be caused by a missing tool in the allow-tools for the specific MPC/SKILL/AGENT or copilit has been started with a specific flag that deny that particular tool._
 
-3. Why does least-privilege scoping reduce risk in cases of prompt injection, not just software bugs?
+**Model answer:**
 
-    _A: Becuase with least-privileg scoping we can scope what our Agent can and cannot do, handling the errors by our self or let the platform — in this case GitHub — do it. We could give deny the write tool when we known that only the reading tool is necessary, lovering significantly the risk of uwnanted writing._
+"Never invoked" locates the failure in the availability/permission layer, upstream of execution: the tool was not callable, so the agent never reached it. Most likely causes: the tool is not in the allow list, or was denied by a `--deny-tool` flag; the MCP server that provides the tool is not configured or failed to connect; or an org/repo policy blocks it. Contrast this with "invoked but errored", where the tool did run and returned an error (bad arguments, auth failure, the external service down). Diagnostic rule: never-invoked points to a permission/availability problem; invoked-and-failed points to an execution/integration problem. Your answer is correct on the cause; just note that "never invoked" does not mean "no error at all", it means the failure happened before tool selection, and add "MCP server not connected" and "org policy" to the list.
 
-4. Both your Cody prompt tool list and an MCP allow list can block tools. Which one still holds if the agent is compromised or manipulated, and why?
+### 2. What is the difference between a remote MCP server (such as GitHub MCP) and an MCP allow list? What does each one control?
 
-    _A: If the Agent is compromised at system-prompt level means that the Agent itself cannot be trusted. MCP allow list on the other hand are handled and checked by Copilot itself — if the tools (or an API subset) is not present on inside the allow-list the tool call will fail._
+**Your answer:**
+
+_A: A Remote MPC Server (such as GitHub MPC) controls and gives to the Agent the list of the APIs that the said Agent can invoke (ie. list of issues from GitHub or branches from a project). The MCP allow list controls which are the APIs that the Agent is allowed to call — which can be a subset of the all available ones._
+
+**Model answer:**
+
+The MCP server defines and exposes the universe of tools available (GitHub MCP exposes issues, branches, PRs; Context7 exposes documentation lookups). The allow list governs which of those exposed tools the agent may actually call in this session or config, a permitted subset. Server = what exists and is connectable; allow list = what is permitted. They compose: a tool is usable only if it is both exposed by a connected server and permitted by the allow list. Your answer is correct and well framed; the only addition is that composition rule.
+
+### 3. Why does least-privilege scoping reduce risk in cases of prompt injection, not just software bugs?
+
+**Your answer:**
+
+_A: Becuase with least-privileg scoping we can scope what our Agent can and cannot do, handling the errors by our self or let the platform — in this case GitHub — do it. We could give deny the write tool when we known that only the reading tool is necessary, lovering significantly the risk of uwnanted writing._
+
+**Model answer:**
+
+Prompt injection works by hijacking the agent's own instructions and reasoning, which is exactly the advisory layer ("the agent knows not to") meant to restrain it. Any control that relies on the agent behaving well fails at the moment injection succeeds. Least-privilege enforced outside the agent (allow list, tool scoping, and above all platform policy) holds regardless of what the manipulated agent is convinced to attempt, because the capability was never granted in the first place. It caps the blast radius: a fully hijacked agent still cannot write, delete, or exfiltrate if those tools are not permitted. Against ordinary bugs least-privilege also helps, by shrinking the surface for accidental damage, but against injection it is essential, because it is the one restraint the attacker cannot talk the agent past. Your answer described the scoping but not the injection-specific reason; note that you actually gave the correct reasoning in Q4, so port it back here.
+
+### 4. Both your Cody prompt tool list and an MCP allow list can block tools. Which one still holds if the agent is compromised or manipulated, and why?
+
+**Your answer:**
+
+_A: If the Agent is compromised at system-prompt level means that the Agent itself cannot be trusted. MCP allow list on the other hand are handled and checked by Copilot itself — if the tools (or an API subset) is not present on inside the allow-list the tool call will fail._
+
+**Model answer:**
+
+The MCP allow list (tool scoping enforced by the harness/platform) holds; the prompt tool list does not. A prompt restriction lives inside the agent's instructions, the same layer a compromise subverts, so a manipulated agent can ignore it. The allow list is checked by Copilot outside the agent's reasoning, so an unpermitted call fails whatever the agent intends. Your core answer is right. Elevate it with the three layers of strength that this lab's own evidence revealed:
+
+1. Prompt tool list = advisory. Fails under compromise.
+2. CLI allow/deny flags (`--allow-tool` / `--deny-tool`) = enforced against the agent's autonomous action. In interactive mode Copilot may still offer you, the human operator, an override prompt (the behavior observed in this lab); in non-interactive `-p` or autopilot runs there is no human, so the denied tool simply fails. So: enforced against the agent, mode-dependent against the operator.
+3. Org Copilot policy, repository permissions, branch protection = platform-enforced, not overridable in-session by either agent or operator.
+
+The exam wants you to place a given control on this ladder and pick the right layer for the threat. For prompt injection in autonomous or CI runs, layer 2 or higher is what saves you. For "no one merges their own PR", only layer 3 works.
 
 ## Connection to the Squad (Informational Only)
 
