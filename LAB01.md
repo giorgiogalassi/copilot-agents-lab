@@ -111,13 +111,21 @@ Rephrase the task and try to bypass the restriction. If the agent still cannot p
 
 ## Self-Assessment Questions (Exam Style)
 
-1. An agent fails a multi-step task involving a REST API. The logs show that the required tool was never invoked. What is the most likely cause?
+1. An agent fails a multi-step task involving a REST API. The logs show that the required tool was never invoked. What is the most likely cause? 
+
+    _*A:* Not invoked suggest that there was no error at all, at the same time the question writes that the multi-step task failed. This can be caused by a missing tool in the allow-tools for the specific MPC/SKILL/AGENT or copilit has been started with a specific flag that deny that particular tool._ 
 
 2. What is the difference between a remote MCP server (such as GitHub MCP) and an MCP allow list? What does each one control?
 
+    _A: A Remote MPC Server (such as GitHub MPC) controls and gives to the Agent the list of the APIs that the said Agent can invoke (ie. list of issues from GitHub or branches from a project). The MCP allow list controls which are the APIs that the Agent is allowed to call — which can be a subset of the all available ones._
+
 3. Why does least-privilege scoping reduce risk in cases of prompt injection, not just software bugs?
 
+    _A: Becuase with least-privileg scoping we can scope what our Agent can and cannot do, handling the errors by our self or let the platform — in this case GitHub — do it. We could give deny the write tool when we known that only the reading tool is necessary, lovering significantly the risk of uwnanted writing._
+
 4. Both your Cody prompt tool list and an MCP allow list can block tools. Which one still holds if the agent is compromised or manipulated, and why?
+
+    _A: If the Agent is compromised at system-prompt level means that the Agent itself cannot be trusted. MCP allow list on the other hand are handled and checked by Copilot itself — if the tools (or an API subset) is not present on inside the allow-list the tool call will fail._
 
 ## Connection to the Squad (Informational Only)
 
