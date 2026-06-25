@@ -1,0 +1,113 @@
+[RUN] copilot --allow-tool ‘shell’
+
+[PROMPT]
+Can you verify the latest Angular documentation using Context7?
+
+[TOOL] MCP: context7
+Action: Resolve Context7 Library ID
+Target: Angular
+
+[TOOL] MCP: context7
+Action: Query Documentation
+Result:
+
+* Retrieved Angular v20 documentation
+* Setup and installation
+* Angular CLI
+* Components and templates
+* Routing
+* Forms
+* HTTP Client
+* Signals
+* SSR/Hydration
+* Migration guidance
+
+[PROMPT]
+Can you write a document here in the repository with this information?
+
+[TOOL] write
+Action: Create file
+Target: evidence/angular-v20-docs-summary.md
+
+[RESULT]
+SUCCESS
+
+⸻
+
+[RUN] copilot --deny-tool ‘write’
+
+[PROMPT]
+Can you verify the latest Angular documentation using Context7?
+
+[TOOL] MCP: context7
+Action: Resolve Context7 Library ID
+Target: Angular
+
+[TOOL] MCP: context7
+Action: Query Documentation
+Result:
+
+* Retrieved Angular v20 documentation
+* Guides
+* API Reference
+* Release Notes
+* Migration Information
+
+[PROMPT]
+Can you write a document here in the repository with this information?
+
+[TOOL] write
+Action: Create file
+Target: angular-v20-overview.md
+
+[RESULT]
+DENIED
+
+[POLICY]
+Permission to run this tool was denied due to the following rule:
+
+* write
+
+[AGENT RESPONSE]
+Repository write blocked. How should I proceed?
+
+⸻
+
+[RUN] copilot --allow-all
+
+[PROMPT]
+Can you verify the latest Angular documentation using Context7?
+
+[TOOL] MCP: context7
+Action: Resolve Context7 Library ID
+Target: Angular
+
+[TOOL] MCP: context7
+Action: Query Documentation
+Result:
+
+* Retrieved Angular v20 documentation
+* Guides
+* API Reference
+* Release Notes
+* Migration Notes
+* Feature Overview
+
+[PROMPT]
+Can you write a document here in the repository with this information?
+
+[TOOL] write
+Action: Create file
+Target: evidence/angular-v20-summary.md
+
+[RESULT]
+SUCCESS
+
+[TOOL] shell
+Action: git add evidence/angular-v20-summary.md
+
+[TOOL] shell
+Action: git commit -m “Add Angular v20 summary”
+
+[RESULT]
+SUCCESS
